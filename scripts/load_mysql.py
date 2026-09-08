@@ -24,9 +24,10 @@ CLEAN_COLS = [
     "device_type",
 ]
 
-PEOPLE_COLS = ["customer_id", "gmv", "orders", "first_order"]
+PEOPLE_COLS = ["customer_id", "gmv", "orders", "first_order", "segment", "R"]
 FLAG_COL = "churn_label"
 MONEY_COL = "order_value"
+CLIENT_COL = "customer_id"
 MARGIN_PCT_COL = "margin_percentage"
 
 DB_USER = os.getenv("MYSQL_USER", "root")
@@ -57,15 +58,16 @@ def main() -> None:
     missing = [c for c in CLEAN_COLS if c not in clean.columns]
     if missing:
         raise SystemExit(f"В clean.parquet нет колонок: {missing}")
+    if "segment" not in people.columns:
+        raise SystemExit("В people.parquet нет segment — сначала: python scripts/report.py")
 
     clean = clean[CLEAN_COLS].copy()
-    # profit для SQL/PBI: order_value * margin% / 100
     clean["profit"] = clean[MONEY_COL] * clean[MARGIN_PCT_COL] / 100
 
-    people = people[PEOPLE_COLS].copy()
+    people = people[[c for c in PEOPLE_COLS if c in people.columns]].copy()
     if FLAG_COL in clean.columns:
-        flag = clean.groupby("customer_id", as_index=False)[FLAG_COL].first()
-        people = people.merge(flag, on="customer_id", how="left")
+        flag = clean.groupby(CLIENT_COL, as_index=False)[FLAG_COL].first()
+        people = people.merge(flag, on=CLIENT_COL, how="left")
 
     with engine.begin() as conn:
         conn.execute(text(f"CREATE DATABASE IF NOT EXISTS `{DB_NAME}`"))
@@ -74,9 +76,7 @@ def main() -> None:
     clean.to_sql("clean_orders", engine, if_exists="replace", index=False, chunksize=5000)
     people.to_sql("people", engine, if_exists="replace", index=False, chunksize=5000)
 
-    #print("clean_orders", len(clean), "gmv", float(clean[MONEY_COL].sum()))
-    #print("profit", float(clean["profit"].sum()))
-    #print("people", len(people), "gmv", float(people["gmv"].sum()), "cols", people.columns.tolist())
+    print("people cols", people.columns.tolist())
 
 
 if __name__ == "__main__":

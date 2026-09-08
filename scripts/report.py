@@ -125,6 +125,18 @@ def kpi_rfm(clean: pd.DataFrame, people: pd.DataFrame) -> pd.DataFrame:
         "gmv%",round(cold["gmv"].sum() / rfm["gmv"].sum() * 100, 1))
     return rfm
 
+def save_people_rfm(people: pd.DataFrame, rfm: pd.DataFrame) -> None:
+    # дописываем segment/R из kpi_rfm в people.parquet для MySQL/PBI
+    out = people.merge(
+        rfm[[CLIENT_COL, "segment", "R"]],
+        on=CLIENT_COL,
+        how="left",
+    )
+    out["R"] = out["R"].astype(int)
+    out["segment"] = out["segment"].astype(str)
+    out.to_parquet(OUT_DIR / "people.parquet", index=False)
+    print("saved people + rfm", OUT_DIR / "people.parquet")
+
 # срез people по churn_label
 def kpi_by_flag(clean: pd.DataFrame, people: pd.DataFrame) -> pd.DataFrame:
     mixed = clean.groupby(CLIENT_COL)[FLAG_COL].nunique()
@@ -216,7 +228,8 @@ def main() -> None:
    #Маршрут B
    kpi_repeat(people)
    kpi_retention(clean)
-   kpi_rfm(clean,people)
+   rfm = kpi_rfm(clean,people)
+   save_people_rfm(people, rfm)
    kpi_by_flag(clean, people)
    #Маршрут C
    kpi_margin(clean)

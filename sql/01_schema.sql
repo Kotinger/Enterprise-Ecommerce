@@ -39,5 +39,7 @@ CREATE TABLE people (
   gmv DECIMAL(14, 2) NOT NULL,
   orders INT NOT NULL,
   first_order DATETIME NOT NULL,
-  churn_label TINYINT NULL
+  churn_label TINYINT NULL,
+  segment VARCHAR(10) NULL,
+  R TINYINT NULL
 ) ENGINE=InnoDB;
