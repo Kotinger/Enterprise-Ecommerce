@@ -88,12 +88,7 @@ def sanity_check(raw: pd.DataFrame, clean: pd.DataFrame) -> None:
     print("отвал строк%", round(drop_pct, 2))
     print("orders", raw[ORDER_COL].nunique(), "->", clean[ORDER_COL].nunique())
     print("gmv", clean[MONEY_COL].sum())
-    print(
-        "money min/median/max",
-        clean[MONEY_COL].min(),
-        clean[MONEY_COL].median(),
-        clean[MONEY_COL].max(),
-    )
+    print("money min/median/max", clean[MONEY_COL].min(), clean[MONEY_COL].median(), clean[MONEY_COL].max())
     print("даты", clean[DATE_COL].min(), "->", clean[DATE_COL].max())
     print("полных дублей строк", int(clean.duplicated().sum()))
     print("клиентов в clean", clean[CLIENT_COL].nunique())
@@ -116,12 +111,7 @@ def prepare_dim_keys(df: pd.DataFrame, key_col: str) -> pd.DataFrame:
     df[key_col] = df[key_col].astype(str).str.strip()
     return df
 
-def join_dims(
-    clean: pd.DataFrame,
-    customers: pd.DataFrame,
-    products: pd.DataFrame,
-    behavior: pd.DataFrame,
-) -> pd.DataFrame:
+def join_dims(clean: pd.DataFrame, customers: pd.DataFrame, products: pd.DataFrame, behavior: pd.DataFrame) -> pd.DataFrame:
     print("--- join ---")
     gmv_before = clean[MONEY_COL].sum()
     rows_before = len(clean)
@@ -150,10 +140,7 @@ def join_dims(
 
     print("rows", rows_before, "->", len(out))
     print("gmv", gmv_before, "->", out[MONEY_COL].sum())
-    print(
-        "новые поля",
-        [c for c in ["country", "category", "churn_label", "margin_percentage"] if c in out.columns],
-    )
+    print("новые поля", [c for c in ["country", "category", "churn_label", "margin_percentage"] if c in out.columns])
     return out
 
 def build_people(clean: pd.DataFrame) -> pd.DataFrame:
@@ -164,12 +151,8 @@ def build_people(clean: pd.DataFrame) -> pd.DataFrame:
     people = base.groupby(CLIENT_COL, as_index=False).agg(
         gmv=(MONEY_COL, "sum"),
         orders=(ORDER_COL, "nunique"),
-        first_order=(DATE_COL, "min"),
-    )
-    print("ltv min/median/max",
-          people["gmv"].min(),
-          people["gmv"].median(),
-          people["gmv"].max())
+        first_order=(DATE_COL, "min"))
+    print("ltv min/median/max", people["gmv"].min(), people["gmv"].median(), people["gmv"].max())
     print("клиентов", len(people), "повторных", int((people["orders"] >= 2).sum()))
     print("repeat%", round((people["orders"] >= 2).mean() * 100, 1))
     print("gmv people", people["gmv"].sum())
