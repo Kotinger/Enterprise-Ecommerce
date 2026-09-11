@@ -130,12 +130,7 @@ data/transactions.csv (+ customers, products, behavior)
 | `sql/07`–`09` | repeat, retention, RFM |
 | `sql/10`–`12` | продукт, churn, fraud |
 
-```text
-python scripts/pipeline.py
-python scripts/report.py
-python scripts/load_mysql.py
-python ml/churn/train.py
-python ml/fraud/train.py
+
 ```
 
 ---
