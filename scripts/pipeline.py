@@ -42,7 +42,6 @@ def check_grain(df: pd.DataFrame) -> str:
     #print("rows", rows, "orders", orders, "->", grain)
     return grain
 
-
 def prepare_types(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
 
@@ -68,9 +67,8 @@ def prepare_types(df: pd.DataFrame) -> pd.DataFrame:
     #print("NaT", df[DATE_COL].isna().sum())
     return df
 
-
 def build_clean(df: pd.DataFrame) -> pd.DataFrame:
-    # отмен нет; money <0 = 0 → фильтр >0 не нужен
+    # отмен нет; money <0 = 0 -> фильтр >0 не нужен
     clean = df.copy()
     #print("старт", len(clean))
     #print("gmv", clean[MONEY_COL].sum(), "rows", len(clean))
@@ -158,7 +156,6 @@ def build_people(clean: pd.DataFrame) -> pd.DataFrame:
     print("gmv people", people["gmv"].sum())
     return people
 
-
 def save_tables(clean: pd.DataFrame, people: pd.DataFrame | None = None) -> None:
     print("--- save ---")
     out_dir = ROOT / "data" / "processed"
@@ -167,11 +164,8 @@ def save_tables(clean: pd.DataFrame, people: pd.DataFrame | None = None) -> None
     clean.to_parquet(out_dir / "clean.parquet", index=False)
     if people is not None:
         people.to_parquet(out_dir / "people.parquet", index=False)
-
     back = pd.read_parquet(out_dir / "clean.parquet")
   
-
-
 def main() -> None:
     raw = load_data(PATH_TXN)
     customers = load_data(PATH_CUST)

@@ -1,5 +1,5 @@
 -- Active: 1788868810471@@127.0.0.1@3306@enterprise_ecommerce
--- Enterprise Ecommerce | зерно: order (transaction_id ≈ order_key)
+-- Enterprise Ecommerce | зерно: order (transaction_id = order_key)
 -- Маршруты A+B+C + риски (fraud) + флаг churn_label
 CREATE DATABASE IF NOT EXISTS enterprise_ecommerce
   CHARACTER SET utf8mb4

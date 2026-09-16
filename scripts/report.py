@@ -23,7 +23,7 @@ def load_tables():
     people = pd.read_parquet(OUT_DIR/"people.parquet")
     return clean, people
 
-#Маршрут A — продажи: GMV, orders, AOV, country, год×месяц
+#Маршрут A - продажи: GMV, orders, AOV, country, год x месяц
 # totals: общий GMV / заказы / AOV + период
 def kpi_totals(clean: pd.DataFrame)-> None:
     gmv = clean[MONEY_COL].sum()
@@ -56,7 +56,7 @@ def kpi_year_month(clean: pd.DataFrame)-> pd.DataFrame:
     print(chek_y_m.head(10))
     return chek_y_m
 
-#Маршрут B — клиенты: repeat, LTV, retention, RFM, churn_label
+#Маршрут B - клиенты: repeat, LTV, retention, RFM, churn_label
 # repeat% + LTV (из people)
 def kpi_repeat(people: pd.DataFrame)-> None:
     print("customer", len(people))
@@ -110,7 +110,9 @@ def kpi_rfm(clean: pd.DataFrame, people: pd.DataFrame)-> pd.DataFrame:
 
 def save_people_rfm(people: pd.DataFrame, rfm: pd.DataFrame)-> None:
     # дописываем segment/R из kpi_rfm в people.parquet для MySQL/PBI
-    out = people.merge(rfm[[CLIENT_COL, "segment", "R"]], on=CLIENT_COL, how="left")
+    # если в people уже есть R/segment (прошлый прогон) - иначе merge даст R_x/R_y
+    base = people.drop(columns=[c for c in ("segment", "R") if c in people.columns])
+    out = base.merge(rfm[[CLIENT_COL, "segment", "R"]], on=CLIENT_COL, how="left")
     out["R"] = out["R"].astype(int)
     out["segment"] = out["segment"].astype(str)
     out.to_parquet(OUT_DIR/"people.parquet", index=False)
@@ -136,7 +138,7 @@ def kpi_by_flag(clean: pd.DataFrame, people: pd.DataFrame)-> pd.DataFrame:
     print(out)
     return out
 
-#Маршрут C — продукт: маржа, топ SKU, категории
+#Маршрут C - продукт: маржа, топ SKU, категории
 # общая маржа = sum(profit) / sum(GMV)
 def kpi_margin(clean: pd.DataFrame)-> None:
     clean = clean.copy()
@@ -177,7 +179,7 @@ def kpi_cat(clean: pd.DataFrame)-> pd.DataFrame:
     print(cat)
     return cat
 
-#Риски — не маршрут из тройки: fraud rate по payment / device
+#Риски - не маршрут из тройки: fraud rate по payment / device
 # доля fraud_label overall + срезы
 def kpi_fraud(clean: pd.DataFrame)-> None:
     rate = clean[FRAUD_COL].mean() * 100

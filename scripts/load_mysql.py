@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, text
 ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT / "data" / "processed"
 
-# в parquet уже snake_case — берём только нужное для KPI
+# в parquet уже snake_case - берём только нужное для KPI
 CLEAN_COLS = [
     "transaction_id",
     "order_key",
@@ -59,7 +59,7 @@ def main() -> None:
     if missing:
         raise SystemExit(f"В clean.parquet нет колонок: {missing}")
     if "segment" not in people.columns:
-        raise SystemExit("В people.parquet нет segment — сначала: python scripts/report.py")
+        raise SystemExit("В people.parquet нет segment - сначала: python scripts/report.py")
 
     clean = clean[CLEAN_COLS].copy()
     clean["profit"] = clean[MONEY_COL] * clean[MARGIN_PCT_COL] / 100
